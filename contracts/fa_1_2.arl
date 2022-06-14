@@ -17,7 +17,7 @@ entry %transfer (%from : address, %to : address, value : nat) {
   effect {
     if caller <> %from then (
       const current = ledger[%from].allowance[caller] ? the : 0;
-      const new_value ?= int_to_nat(current - value) : ("NotEnoughAllowance", ((value, current)));
+      const new_value ?= int_to_nat(current - value) : ("NotEnoughAllowance", (value, current));
       ledger[%from].allowance.put(caller, new_value);
     );
     ledger.update(%from, { tokens -= value });
@@ -27,7 +27,7 @@ entry %transfer (%from : address, %to : address, value : nat) {
 
 entry approve(spender : address, value : nat) {
   const previous = ledger[caller] ? (the.allowance[spender] ? the : 0) : 0;
-  do_fail_if(previous > 0 and value > 0, (("UnsafeAllowanceChange", previous)));
+  do_fail_if(previous > 0 and value > 0, ("UnsafeAllowanceChange", previous));
   ledger[caller].allowance.put(spender, value);
 }
 
