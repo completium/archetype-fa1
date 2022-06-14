@@ -18,7 +18,7 @@ entry %transfer (%from : address, %to : address, value : nat) {
       const new_value ?= int_to_nat(current - value) : ("NotEnoughAllowance", (value, current));
       ledger[%from].allowance.put(caller, new_value);
     );
-    ledger.update(%from, { tokens -= value });
+    ledger.update(%from,   { tokens -= value });
     ledger.add_update(%to, { tokens += value });
   }
 }
