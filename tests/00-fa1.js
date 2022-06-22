@@ -10,7 +10,7 @@ const {
   setMockupNow,
   setQuiet,
 } = require('@completium/completium-cli');
-const { errors, getBalance } = require('./utils');
+const { errors, getBalance, getAllowance } = require('./utils');
 const assert = require('assert');
 
 // contracts
@@ -49,7 +49,7 @@ describe('[FA1_2] Contract deployment', async () => {
   });
 });
 
-describe('[FA1_2] Tranfer', async () => {
+describe('[FA1_2] Transfer', async () => {
   it('Check if balances are right', async () => {
     const alice_balance = await getBalance(fa1_2, alice.pkh);
     assert(alice_balance == total_supply, "INVALID_BALANCE");
@@ -134,7 +134,7 @@ describe('[FA1_2] Allowance ', async () => {
     await fa1_2.approve({
       arg: {
         spender: carl.pkh,
-        value: 0,
+        value: 10,
       },
       as: user1.pkh,
     })
@@ -198,6 +198,10 @@ describe('[FA1_2] Allowance and Transfer ', async () => {
 describe('[FA1_2] Getters', async () => {
 
   it('Check getAllowance values', async () => {
+    // const user1_allowance = await getAllowance(fa1_2, user1.pkh, carl.pkh);
+
+    const value = await runGetter("getAllowance", fa1_2.address, { argMichelson: `(Pair "${user1.pkh}" "${carl.pkh}")`, as: alice.pkh })
+    assert(value === "10", "Invalid value for getAllowance")
   })
 
   it('Check getBalance values', async () => {

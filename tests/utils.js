@@ -18,18 +18,7 @@ exports.getBalance = async (fa1, pkh) => {
 
 exports.getAllowance = async (fa1, pkh, spender) => {
   const v = await getLedger(fa1, pkh);
-  console.log(JSON.stringify(0, 2, v.args[1]))
   return v != null ? v.args[1] : '0';
-}
-
-exports.getBalance = async (fa1, pkh, spender) => {
-  const storage = await fa1.getStorage();
-  const balance = await getValueFromBigMap(
-    parseInt(storage),
-    exprMichelineToJson(`"${pkh}"`),
-    exprMichelineToJson(`address`)
-  );
-  return balance != null && balance.args !== undefined && balance.args.length > 0 && balance.args[0].int !== undefined ? balance.args[0].int : '0';
 }
 
 exports.errors = {
