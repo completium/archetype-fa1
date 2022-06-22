@@ -43,6 +43,7 @@ describe('[FA1_2] Contract deployment', async () => {
       './contracts/fa1_2.arl',
       {
         parameters: {
+          initial_holder: alice.pkh,
           total_supply: total_supply,
         },
         as: alice.pkh,

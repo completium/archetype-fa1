@@ -1,11 +1,11 @@
-archetype fa1_2(total_supply : nat)
+archetype fa1_2(const initial_holder : address, const total_supply : nat)
 
 asset ledger identified by holder to big_map {
   holder     : address;
   tokens     : nat = 0;
   allowance  : map<address, nat> = [];
 } initialized by {
-  { holder = tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb; tokens = total_supply }
+  { holder = initial_holder; tokens = total_supply }
 }
 
 entry %transfer (%from : address, %to : address, value : nat) {
