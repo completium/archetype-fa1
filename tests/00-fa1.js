@@ -42,6 +42,7 @@ describe('[FA1_2] Contract deployment', async () => {
         parameters: {
           initial_holder: alice.pkh,
           total_supply: total_supply,
+          metadata_coin: '0x697066733a2f2f516d586a6633734e6848544d523665434e52746d74746b6b50636f6948556a4c4765794b6b436852626d5373726a'
         },
         as: alice.pkh,
       }

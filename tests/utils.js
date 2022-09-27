@@ -5,7 +5,7 @@ const assert = require('assert');
 async function getLedger(fa1, pkh) {
   const storage = await fa1.getStorage();
   return await getValueFromBigMap(
-    parseInt(storage),
+    parseInt(storage.ledger),
     exprMichelineToJson(`"${pkh}"`),
     exprMichelineToJson(`address`)
   )

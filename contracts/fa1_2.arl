@@ -1,4 +1,4 @@
-archetype fa1_2(const initial_holder : address, const total_supply : nat)
+archetype fa1_2(const initial_holder : address, const total_supply : nat, const metadata_coin : bytes)
 
 asset ledger identified by holder to big_map {
   holder     : address;
@@ -6,6 +6,23 @@ asset ledger identified by holder to big_map {
   allowance  : map<address, nat> = [];
 } initialized by {
   { holder = initial_holder; tokens = total_supply }
+}
+
+constant TOKEN_ID : nat = 0
+
+asset token_metadata to big_map {
+  ftoken_metadata : nat;
+  token_id        : nat;
+  token_info      : map<string, bytes>;
+} initialized with {
+  {TOKEN_ID; TOKEN_ID; [("", metadata_coin)]}
+}
+
+entry set_token_metadata (tid : nat, tdata: map<string, bytes>) {
+  called by initial_holder
+  effect {
+    token_metadata.add_update(tid, { token_id = tid; token_info = tdata });
+  }
 }
 
 entry %transfer (%from : address, %to : address, value : nat) {
