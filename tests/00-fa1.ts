@@ -47,7 +47,7 @@ describe('[FA1.2] Contracts deployment', async () => {
   });
 });
 
-describe('[FA1_2] Transfer', async () => {
+describe('[FA1.2] Transfer', async () => {
   it('Check if balances are right', async () => {
     const alice_balance = await fa1_2.get_ledger_value(alice.get_address());
     assert(alice_balance?.tokens.equals(total_supply), "INVALID_BALANCE");
@@ -87,7 +87,7 @@ describe('[FA1_2] Transfer', async () => {
 });
 
 
-describe('[FA1_2] Allowance ', async () => {
+describe('[FA1.2] Allowance ', async () => {
   it('Approve known caller with 0 spender allowance should succeed', async () => {
     await fa1_2.approve( carl.get_address(), new Nat(0), {as: bob})
   })
@@ -105,7 +105,7 @@ describe('[FA1_2] Allowance ', async () => {
   })
 })
 
-describe('[FA1_2] Allowance and Transfer ', async () => {
+describe('[FA1.2] Allowance and Transfer ', async () => {
 
   it('Approve and transfer known caller with 0 spender allowance should succeed', async () => {
     const alice_balance_before = await fa1_2.get_ledger_value(alice.get_address());
@@ -129,7 +129,7 @@ describe('[FA1_2] Allowance and Transfer ', async () => {
 
 })
 
-describe('[FA1_2] Getters', async () => {
+describe('[FA1.2] Getters', async () => {
 
   it('Check getAllowance values', async () => {
     const value = await fa1_2.getAllowance(user1.get_address(), carl.get_address(), {as: alice} );
