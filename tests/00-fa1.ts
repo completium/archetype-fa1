@@ -1,12 +1,11 @@
-import { Bytes, Key, Nat, Option, Or, pair_to_mich, Signature, string_to_mich } from '@completium/archetype-ts-types'
-import { blake2b, expect_to_fail, get_account, set_mockup, set_mockup_now, set_quiet, } from '@completium/experiment-ts'
+import { Bytes, Nat, pair_to_mich, string_to_mich } from '@completium/archetype-ts-types'
+import { expect_to_fail, get_account, set_mockup, set_mockup_now, set_quiet } from '@completium/experiment-ts'
 
-
-const assert = require('assert');
+import assert from 'assert';
 
 /* Contracts */
 
-import { fa1_2, ledger_value } from './binding/fa1_2';
+import { fa1_2 } from './binding/fa1_2';
 
 /* Accounts ----------------------------------------------------------------- */
 
@@ -14,9 +13,6 @@ const alice = get_account('alice');
 const bob   = get_account('bob');
 const carl  = get_account('carl');
 const user1 = get_account('bootstrap1');
-const user2 = get_account('bootstrap2');
-const user3 = get_account('bootstrap3');
-const user4 = get_account('bootstrap4');
 
 
 /* Endpoint ---------------------------------------------------------------- */
