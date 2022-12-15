@@ -1,7 +1,5 @@
 import * as ex from "@completium/experiment-ts";
 import * as att from "@completium/archetype-ts-types";
-export type ledger_key = att.Address;
-export type token_metadata_key = att.Nat;
 export const ledger_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("address", []);
 export const token_metadata_key_mich_type: att.MichelineType = att.prim_annot_to_mich_type("nat", []);
 export class ledger_value implements att.ArchetypeType {
@@ -20,7 +18,10 @@ export class ledger_value implements att.ArchetypeType {
             })]);
     }
     equals(v: ledger_value): boolean {
-        return (this.tokens.equals(v.tokens) && this.tokens.equals(v.tokens) && JSON.stringify(this.allowance) == JSON.stringify(v.allowance));
+        return att.micheline_equals(this.to_mich(), v.to_mich());
+    }
+    static from_mich(input: att.Micheline): ledger_value {
+        return new ledger_value(att.mich_to_nat((input as att.Mpair).args[0]), att.mich_to_map((input as att.Mpair).args[1], (x, y) => [att.mich_to_address(x), att.mich_to_nat(y)]));
     }
 }
 export class token_metadata_value implements att.ArchetypeType {
@@ -39,7 +40,10 @@ export class token_metadata_value implements att.ArchetypeType {
             })]);
     }
     equals(v: token_metadata_value): boolean {
-        return (this.token_id.equals(v.token_id) && this.token_id.equals(v.token_id) && JSON.stringify(this.token_info) == JSON.stringify(v.token_info));
+        return att.micheline_equals(this.to_mich(), v.to_mich());
+    }
+    static from_mich(input: att.Micheline): token_metadata_value {
+        return new token_metadata_value(att.mich_to_nat((input as att.Mpair).args[0]), att.mich_to_map((input as att.Mpair).args[1], (x, y) => [att.mich_to_string(x), att.mich_to_bytes(y)]));
     }
 }
 export const ledger_value_mich_type: att.MichelineType = att.pair_array_to_mich_type([
@@ -51,11 +55,11 @@ export const token_metadata_value_mich_type: att.MichelineType = att.pair_array_
     att.pair_annot_to_mich_type("map", att.prim_annot_to_mich_type("string", []), att.prim_annot_to_mich_type("bytes", []), ["%token_info"])
 ], []);
 export type ledger_container = Array<[
-    ledger_key,
+    att.Address,
     ledger_value
 ]>;
 export type token_metadata_container = Array<[
-    token_metadata_key,
+    att.Nat,
     token_metadata_value
 ]>;
 export const ledger_container_mich_type: att.MichelineType = att.pair_annot_to_mich_type("big_map", att.prim_annot_to_mich_type("address", []), att.pair_array_to_mich_type([
@@ -191,7 +195,7 @@ export class Fa1_2 {
             if (this.getAllowance_callback_address != undefined) {
                 const entrypoint = new att.Entrypoint(new att.Address(this.getAllowance_callback_address), "callback");
                 await ex.call(this.address, "getAllowance", att.getter_args_to_mich(getAllowance_arg_to_mich(owner, spender), entrypoint), params);
-                return await ex.get_callback_value<att.Nat>(this.getAllowance_callback_address, x => { return new att.Nat(x); });
+                return await ex.get_callback_value<att.Nat>(this.getAllowance_callback_address, x => { return att.mich_to_nat(x); });
             }
         }
         throw new Error("Contract not initialised");
@@ -201,7 +205,7 @@ export class Fa1_2 {
             if (this.getBalance_callback_address != undefined) {
                 const entrypoint = new att.Entrypoint(new att.Address(this.getBalance_callback_address), "callback");
                 await ex.call(this.address, "getBalance", att.getter_args_to_mich(getBalance_arg_to_mich(owner), entrypoint), params);
-                return await ex.get_callback_value<att.Nat>(this.getBalance_callback_address, x => { return new att.Nat(x); });
+                return await ex.get_callback_value<att.Nat>(this.getBalance_callback_address, x => { return att.mich_to_nat(x); });
             }
         }
         throw new Error("Contract not initialised");
@@ -211,22 +215,17 @@ export class Fa1_2 {
             if (this.getTotalSupply_callback_address != undefined) {
                 const entrypoint = new att.Entrypoint(new att.Address(this.getTotalSupply_callback_address), "callback");
                 await ex.call(this.address, "getTotalSupply", att.getter_args_to_mich(getTotalSupply_arg_to_mich(), entrypoint), params);
-                return await ex.get_callback_value<att.Nat>(this.getTotalSupply_callback_address, x => { return new att.Nat(x); });
+                return await ex.get_callback_value<att.Nat>(this.getTotalSupply_callback_address, x => { return att.mich_to_nat(x); });
             }
         }
         throw new Error("Contract not initialised");
     }
-    async get_ledger_value(key: ledger_key): Promise<ledger_value | undefined> {
+    async get_ledger_value(key: att.Address): Promise<ledger_value | undefined> {
         if (this.address != undefined) {
-            const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.ledger), key.to_mich(), ledger_key_mich_type, ledger_value_mich_type), collapsed = true;
+            const storage = await ex.get_raw_storage(this.address);
+            const data = await ex.get_big_map_value(BigInt(att.mich_to_int((storage as att.Mpair).args[0]).toString()), key.to_mich(), ledger_key_mich_type);
             if (data != undefined) {
-                return new ledger_value((x => { return new att.Nat(x); })(data.tokens), (x => { let res: Array<[
-                    att.Address,
-                    att.Nat
-                ]> = []; for (let e of x.entries()) {
-                    res.push([(x => { return new att.Address(x); })(e[0]), (x => { return new att.Nat(x); })(e[1])]);
-                } return res; })(data.allowance));
+                return ledger_value.from_mich(data);
             }
             else {
                 return undefined;
@@ -234,10 +233,10 @@ export class Fa1_2 {
         }
         throw new Error("Contract not initialised");
     }
-    async has_ledger_value(key: ledger_key): Promise<boolean> {
+    async has_ledger_value(key: att.Address): Promise<boolean> {
         if (this.address != undefined) {
-            const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.ledger), key.to_mich(), ledger_key_mich_type, ledger_value_mich_type), collapsed = true;
+            const storage = await ex.get_raw_storage(this.address);
+            const data = await ex.get_big_map_value(BigInt(att.mich_to_int((storage as att.Mpair).args[0]).toString()), key.to_mich(), ledger_key_mich_type);
             if (data != undefined) {
                 return true;
             }
@@ -247,17 +246,12 @@ export class Fa1_2 {
         }
         throw new Error("Contract not initialised");
     }
-    async get_token_metadata_value(key: token_metadata_key): Promise<token_metadata_value | undefined> {
+    async get_token_metadata_value(key: att.Nat): Promise<token_metadata_value | undefined> {
         if (this.address != undefined) {
-            const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.token_metadata), key.to_mich(), token_metadata_key_mich_type, token_metadata_value_mich_type), collapsed = true;
+            const storage = await ex.get_raw_storage(this.address);
+            const data = await ex.get_big_map_value(BigInt(att.mich_to_int((storage as att.Mpair).args[1]).toString()), key.to_mich(), token_metadata_key_mich_type);
             if (data != undefined) {
-                return new token_metadata_value((x => { return new att.Nat(x); })(data.token_id), (x => { let res: Array<[
-                    string,
-                    att.Bytes
-                ]> = []; for (let e of x.entries()) {
-                    res.push([(x => { return x; })(e[0]), (x => { return new att.Bytes(x); })(e[1])]);
-                } return res; })(data.token_info));
+                return token_metadata_value.from_mich(data);
             }
             else {
                 return undefined;
@@ -265,10 +259,10 @@ export class Fa1_2 {
         }
         throw new Error("Contract not initialised");
     }
-    async has_token_metadata_value(key: token_metadata_key): Promise<boolean> {
+    async has_token_metadata_value(key: att.Nat): Promise<boolean> {
         if (this.address != undefined) {
-            const storage = await ex.get_storage(this.address);
-            const data = await ex.get_big_map_value(BigInt(storage.token_metadata), key.to_mich(), token_metadata_key_mich_type, token_metadata_value_mich_type), collapsed = true;
+            const storage = await ex.get_raw_storage(this.address);
+            const data = await ex.get_big_map_value(BigInt(att.mich_to_int((storage as att.Mpair).args[1]).toString()), key.to_mich(), token_metadata_key_mich_type);
             if (data != undefined) {
                 return true;
             }
