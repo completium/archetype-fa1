@@ -7,7 +7,9 @@
   },
   "scripts": {
     "test": "ts-mocha --timeout 0 --slow 99999999999999999 ./tests/*.ts",
-    "gen-binding": "completium-cli generate binding-ts _ --input-path ./contracts/ --output-path ./tests/binding/"
+    "gen-binding": "completium-cli generate binding-ts _ --input-path ./contracts/ --output-path ./tests/binding/",
+    "completium_init": "completium-cli init",
+    "mockup_init": "completium-cli mockup init"
   },
   "dependencies": {
     "@completium/archetype-ts-types": "^0.0.18",
