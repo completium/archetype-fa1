@@ -39,13 +39,13 @@ const error_ledger_not_found = pair_to_mich([string_to_mich("\"ASSET_NOT_FOUND\"
 
 /* Scenarios --------------------------------------------------------------- */
 
-describe('[FA1.2] Contracts deployment', async () => {
+describe('[FA1.2] Contracts deployment', () => {
   it('FA1.2 contract deployment should succeed', async () => {
     await fa1_2.deploy(alice.get_address(), total_supply, metadata_coin, { as: alice })
   });
 });
 
-describe('[FA1.2] Transfer', async () => {
+describe('[FA1.2] Transfer', () => {
   it('Check if balances are right', async () => {
     const alice_balance = await fa1_2.get_ledger_value(alice.get_address());
     assert(alice_balance?.tokens.equals(total_supply), "INVALID_BALANCE");
@@ -85,7 +85,7 @@ describe('[FA1.2] Transfer', async () => {
 });
 
 
-describe('[FA1.2] Allowance ', async () => {
+describe('[FA1.2] Allowance ', () => {
   it('Approve known caller with 0 spender allowance should succeed', async () => {
     await fa1_2.approve( carl.get_address(), new Nat(0), {as: bob})
   })
@@ -103,7 +103,7 @@ describe('[FA1.2] Allowance ', async () => {
   })
 })
 
-describe('[FA1.2] Allowance and Transfer ', async () => {
+describe('[FA1.2] Allowance and Transfer ', () => {
 
   it('Approve and transfer known caller with 0 spender allowance should succeed', async () => {
     const alice_balance_before = await fa1_2.get_ledger_value(alice.get_address());
@@ -115,19 +115,19 @@ describe('[FA1.2] Allowance and Transfer ', async () => {
     await fa1_2.transfer(alice.get_address(), bob.get_address(), new Nat(v), {as: carl});
 
     const alice_balance = await fa1_2.get_ledger_value(alice.get_address());
-    let value_alice_balance = alice_balance_before?.tokens.to_big_number().minus(v);
+    const value_alice_balance = alice_balance_before?.tokens.to_big_number().minus(v);
     const vab = value_alice_balance === undefined ? 0 : value_alice_balance
     assert(alice_balance?.tokens.equals(new Nat(vab)), "INVALID_BALANCE");
 
     const bob_balance = await fa1_2.get_ledger_value(bob.get_address());
-    let value_bob_balance = bob_balance_before?.tokens.to_big_number().plus(v);
+    const value_bob_balance = bob_balance_before?.tokens.to_big_number().plus(v);
     const vbb = value_bob_balance === undefined ? 0 : value_bob_balance
     assert(bob_balance?.tokens.equals(new Nat(vbb)), "INVALID_BALANCE");
   })
 
 })
 
-describe('[FA1.2] Getters', async () => {
+describe('[FA1.2] Getters', () => {
 
   it('Check getAllowance values', async () => {
     const value = await fa1_2.getAllowance(user1.get_address(), carl.get_address(), {as: alice} );
